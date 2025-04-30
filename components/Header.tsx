@@ -2,12 +2,30 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleLogin = () => {
+    if (typeof window !== 'undefined' && window.openLoginModal) {
+      window.openLoginModal();
+    }
+  };
+
+  const handleRegister = () => {
+    if (typeof window !== 'undefined' && window.openRegisterModal) {
+      window.openRegisterModal();
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -45,11 +63,55 @@ const Header = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
-            <Link href="/account" className="text-gray-700 hover:text-blue-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </Link>
+            
+            {user ? (
+              <div className="relative group">
+                <button className="text-gray-700 hover:text-blue-600 transition-colors flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="ml-1 hidden lg:inline-block">{user.name?.split(' ')[0]}</span>
+                </button>
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                  <Link href="/account" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left">
+                    My Account
+                  </Link>
+                  <Link href="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left">
+                    My Orders
+                  </Link>
+                  <button 
+                    onClick={handleLogout}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={handleLogin}
+                  className="text-gray-700 hover:text-blue-600 transition-colors hidden md:block"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={handleRegister}
+                  className="bg-blue-600 text-white px-4 py-1.5 rounded-md hover:bg-blue-700 transition-colors hidden md:block"
+                >
+                  Sign Up
+                </button>
+                <button 
+                  onClick={handleLogin}
+                  className="text-gray-700 hover:text-blue-600 transition-colors md:hidden"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            
             <Link href="/wishlist" className="text-gray-700 hover:text-blue-600 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -125,6 +187,58 @@ const Header = () => {
               >
                 Contact
               </Link>
+              
+              {!user && (
+                <div className="flex space-x-4 pt-2 border-t border-gray-100">
+                  <button 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogin();
+                    }}
+                    className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleRegister();
+                    }}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                </div>
+              )}
+              
+              {user && (
+                <div className="pt-2 border-t border-gray-100">
+                  <p className="text-gray-500 text-sm py-1">Logged in as {user.name}</p>
+                  <Link 
+                    href="/account" 
+                    className="text-gray-700 hover:text-blue-600 transition-colors py-2 block"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    My Account
+                  </Link>
+                  <Link 
+                    href="/orders" 
+                    className="text-gray-700 hover:text-blue-600 transition-colors py-2 block"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    My Orders
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="text-red-600 hover:text-red-800 transition-colors py-2"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </nav>
           </div>
         </div>

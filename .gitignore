@@ -34,3 +34,6 @@ next-env.d.ts
 
 # PowerShell scripts
 *.ps1
+
+# Local Netlify folder
+.netlify
